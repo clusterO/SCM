@@ -1,57 +1,44 @@
-# SCM - Go Microservices Boilerplate with GraphQL, MongoDB, and gRPC
+# SCM - Go Microservices Boilerplate with GQL MongoDB & gRPC
 
-SCM is a Go microservices boilerplate that provides a foundation for building scalable and modular applications using GraphQL, MongoDB, and gRPC. It aims to provide a structured and efficient starting point for developing microservices-based applications.
-
-## Features
-
-- Implements a microservices architecture with Go.
-- Utilizes GraphQL for efficient and flexible API development.
-- Integrates with MongoDB for data storage and retrieval.
-- Supports gRPC for inter-service communication.
-- Provides a Docker-based development environment for easy setup and deployment.
+SCM is a Go microservices boilerplate that provides a foundation for building scalable and modular applications using GraphQL, MongoDB, and gRPC. It includes the necessary components and libraries to get started quickly.
 
 ## Prerequisites
 
-Make sure you have the following dependencies installed:
+Make sure you have the following prerequisites installed:
 
-- [Go Kit](https://github.com/go-kit/kit)
-- [Kit](https://github.com/kujtimiihoxha/kit)
-- [GraphQL-Go](https://github.com/graphql-go/graphql)
-- [mgo.v2](https://gopkg.in/mgo.v2)
-
-## Getting Started
-
-To run the SCM project, follow these steps:
-
-1. Clone the repository.
-2. Make sure you have Docker installed on your system.
-3. Run the project using Docker Compose: `docker-compose up`.
+- [Go Kit](https://github.com/go-kit/kit): A toolkit for building microservices in Go.
+- [GrantZheng/kit](https://github.com/GrantZheng/kit): A library that complements Go Kit and provides additional utilities.
+- [GraphQL](https://github.com/graphql-go/graphql): An implementation of GraphQL in Go.
+- [MongoDB](https://gopkg.in/mgo.v2): The official MongoDB driver for Go.
 
 ## Usage
 
-Once the project is up and running, you can interact with the services using the following commands:
+1. Clone the repository: `git clone https://github.com/your-repo.git`
+2. Install the project dependencies using [Glide](https://glide.sh/): `glide install`
+3. Run the project: `docker-compose up`
+4. Call the DB service using curl: `curl -XPOST http://localhost:8800/connect -d '{"":""}'`
 
-- Call the database service: `curl -XPOST http://localhost:8800/connect -d '{"":""}'`.
+## Resources
 
-## Contributing
+To learn more about the components used in this project, you can refer to the following resources:
 
-Contributions are welcome! If you have any ideas, improvements, or bug fixes, please open an issue or submit a pull request.
+- [Go Kit](https://github.com/go-kit/kit): Official documentation for Go Kit.
+- [GrantZheng/kit](https://github.com/GrantZheng/kit): Documentation for GrantZheng's kit library.
+- [GraphQL in Go](https://github.com/graphql-go/graphql): Official documentation for GraphQL in Go.
+- [MongoDB Go Driver](https://gopkg.in/mgo.v2): Official documentation for the MongoDB Go driver.
 
-## License
+## Project Importance
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Please see the LICENSE file for more details.
+The SCM boilerplate provides a solid foundation for building microservices-based applications with a focus on scalability, modularity, and ease of development. It integrates popular technologies such as GraphQL, MongoDB, and gRPC, allowing developers to quickly build robust and efficient applications.
 
-## Acknowledgements
+## What's Next
 
-SCM is built upon the hard work and contributions of various open-source projects and libraries. We acknowledge and thank the authors and maintainers of those projects for their valuable work.
+The project is actively maintained and open to contributions. Some potential areas of improvement and future enhancements include:
 
-## Next Steps
+- Adding more examples and usage scenarios
+- Enhancing security measures
+- Integrating additional databases or message brokers
+- Providing more extensive documentation and tutorials
 
-- Implement additional microservices as per your project requirements.
-- Customize the GraphQL schema and resolvers to suit your application needs.
-- Extend functionality by integrating with other services or APIs.
-- Add unit tests and ensure code coverage for reliable and robust applications.
-- Optimize performance and scalability based on your specific use cases.
-- Document the APIs and provide clear guidelines for developers and users.
+Feel free to contribute to the project by submitting pull requests or opening issues for bug reports or feature requests.
 
-Enjoy building your microservices-based application with SCM!
