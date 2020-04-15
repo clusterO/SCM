@@ -13,7 +13,7 @@ Make sure you have the following prerequisites installed:
 
 ## Usage
 
-1. Clone the repository: `git clone https://github.com/your-repo.git`
+1. Clone the repository: `git clone https://github.com/scm.git`
 2. Install the project dependencies using [Glide](https://glide.sh/): `glide install`
 3. Run the project: `docker-compose up`
 4. Call the DB service using curl: `curl -XPOST http://localhost:8800/connect -d '{"":""}'`
