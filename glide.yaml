@@ -2,3 +2,4 @@ package: .
 import:
 - package: github.com/go-kit/kit
   version: v0.12.0
+- package: gopkg.in/mgo.v2

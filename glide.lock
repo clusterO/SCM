@@ -1,6 +1,11 @@
-hash: 3812c369f5f0ba5c914add466af1b0481797a1f78b941503f4823d889d6401c3
-updated: 2023-06-15T14:33:32.307418264+01:00
+hash: 9c551af4d9f9165b1242c50ca865f156065b34b5476fd83c734aeabd58d8f67e
+updated: 2023-06-15T16:39:24.191134913+01:00
 imports:
 - name: github.com/go-kit/kit
   version: 251777ffd4f40c09ed5bf239545b1dc6b1964a98
+- name: gopkg.in/mgo.v2
+  version: a6b53ec6cb22a3699387a57a161566f9402ee85b
+  subpackages:
+  - bson
+  - internal/json
 testImports: []
