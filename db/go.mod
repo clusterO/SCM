@@ -1,8 +1,9 @@
 module db
 
-go 1.20
+go 1.18
 
 require (
+	github.com/go-kit/kit v0.12.0
 	github.com/joho/godotenv v1.5.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 )

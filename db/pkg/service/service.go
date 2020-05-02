@@ -1,20 +1,28 @@
-package service
+package dbservice
 
 import (
+	"context"
 	"errors"
+	"net/http"
 	"os"
 
+	"github.com/go-kit/kit/endpoint"
+	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/joho/godotenv"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
+/* Business logic */
+
 // DbService describes the database service.
 type DbService interface {
-	SaveUser(user *User) error
-	GetUserByID(userID string) (*User, error)
-	GetUserByUsername(username string) (*User, error)
+	SaveUser(ctx context.Context, user *User) error
+	GetUserByID(ctx context.Context, userID string) (*User, error)
+	GetUserByUsername(ctx context.Context, username string) (*User, error)
 }
+
+type DBService struct{}
 
 // User represents a user in the system.
 type User struct {
@@ -35,7 +43,7 @@ func NewDbService(session *mgo.Session) DbService {
 }
 
 // SaveUser saves a user to the database.
-func (d *db) SaveUser(user *User) error {
+func (d *db) SaveUser(ctx context.Context, user *User) error {
 	session := d.session.Copy()
 	defer session.Close()
 
@@ -57,7 +65,7 @@ func (d *db) SaveUser(user *User) error {
 }
 
 // GetUserByID retrieves a user from the database based on the user ID.
-func (d *db) GetUserByID(userID string) (*User, error) {
+func (d *db) GetUserByID(ctx context.Context, userID string) (*User, error) {
 	session := d.session.Copy()
 	defer session.Close()
 
@@ -73,7 +81,7 @@ func (d *db) GetUserByID(userID string) (*User, error) {
 }
 
 // GetUserByUsername retrieves a user from the database based on the username.
-func (d *db) GetUserByUsername(username string) (*User, error) {
+func (d *db) GetUserByUsername(ctx context.Context, username string) (*User, error) {
 	session := d.session.Copy()
 	defer session.Close()
 
@@ -109,4 +117,51 @@ func init() {
 	if err != nil {
 		panic("Failed to load .env file")
 	}
+}
+
+/* Endpoints */
+
+type Endpoints struct {
+	SaveUserEndpoint          endpoint.Endpoint
+	GetUserByIDEndpoint       endpoint.Endpoint
+	GetUserByUsernameEndpoint endpoint.Endpoint
+}
+
+func NewEndpoints(s DbService) Endpoints {
+	return Endpoints{
+		SaveUserEndpoint:          MakeSaveUserEndpoint(s),
+		GetUserByIDEndpoint:       MakeGetUserByIDEndpoint(s),
+		GetUserByUsernameEndpoint: MakeGetUserByUsernameEndpoint(s),
+	}
+}
+
+/* Transports */
+
+func NewHTTPHandler(endpoints Endpoints) http.Handler {
+	mux := http.NewServeMux()
+
+	options := []httptransport.ServerOption{}
+
+	mux.Handle("/saveUser", httptransport.NewServer(
+		endpoints.SaveUserEndpoint,
+		decodeSaveUserRequest,
+		encodeResponse,
+		options...,
+	))
+
+	mux.Handle("/getUserByID", httptransport.NewServer(
+		endpoints.GetUserByIDEndpoint,
+		decodeGetUserByIDRequest,
+		encodeResponse,
+		options...,
+	))
+
+	mux.Handle("/getUserByUsername", httptransport.NewServer(
+		endpoints.GetUserByUsernameEndpoint,
+		decodeGetUserByUsernameRequest,
+		encodeResponse,
+		options...,
+	))
+
+	return mux
 }

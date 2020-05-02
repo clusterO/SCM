@@ -15,8 +15,8 @@ Make sure you have the following prerequisites installed:
 
 1. Clone the repository: `git clone https://github.com/scm.git`
 2. Install the project dependencies using [Glide](https://glide.sh/): `glide install`
-3. Run the project: `docker-compose up`
-4. Call the DB service using curl: `curl -XPOST http://localhost:8800/connect -d '{"":""}'`
+3. Run the project: `go run .`
+4. Call the DB service using curl: `curl -XPOST -d'{"Username":"admin"}' localhost:8080/get_by_username `
 
 ## Resources
 
@@ -41,4 +41,3 @@ The project is actively maintained and open to contributions. Some potential are
 - Providing more extensive documentation and tutorials
 
 Feel free to contribute to the project by submitting pull requests or opening issues for bug reports or feature requests.
-
