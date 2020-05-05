@@ -1,79 +1,97 @@
-package dbservice
+package db
 
 import (
 	"context"
 	"errors"
-	"net/http"
-	"os"
 
-	"github.com/go-kit/kit/endpoint"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/joho/godotenv"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	driverbson "go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/* Business logic */
-
-// DbService describes the database service.
+// DbService describes the service.
 type DbService interface {
-	SaveUser(ctx context.Context, user *User) error
-	GetUserByID(ctx context.Context, userID string) (*User, error)
-	GetUserByUsername(ctx context.Context, username string) (*User, error)
+	SaveUser(user *User) error
+	GetUserByID(userID string) (*User, error)
+	GetUserByUsername(username string) (*User, error)
 }
 
+/* Business logic */
+// -- publicly accessible FIX
 type DBService struct{}
 
-// User represents a user in the system.
-type User struct {
-	ID       bson.ObjectId `bson:"_id,omitempty"`
-	Username string        `bson:"username"`
-	Email    string        `bson:"email"`
-	Password string        `bson:"password"`
-}
 
-// db implements the DbService interface.
-type db struct {
-	session *mgo.Session
-}
+/* type DBService struct{
+	repository Repository
+	logger log.Logger
+}*/
 
-// NewDbService creates a new instance of the database service.
-func NewDbService(session *mgo.Session) DbService {
-	return &db{session: session}
+/*
+func NewDbService(rep Repository, logger log.Logger) DbService {
+	return &dbService{
+		repository: rep,
+		logger: logger,
+	}
 }
+*/
 
 // SaveUser saves a user to the database.
-func (d *db) SaveUser(ctx context.Context, user *User) error {
-	session := d.session.Copy()
-	defer session.Close()
+func (dbs DBService) SaveUser(user *User) error {
+	// logger := log.With(dbs.logger, "method", "SaveUser")
 
-	collection := session.DB(getDBName()).C("users")
+	/*** TO DO through repository ***/
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(getDBUrl()))
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+
+	collection := client.Database(getDBName()).Collection("users")
 
 	// Check if the user already exists in the database
 	existingUser := User{}
-	err := collection.Find(bson.M{"username": user.Username}).One(&existingUser)
+	err = collection.FindOne(context.TODO(), driverbson.D{{Key: "username", Value: user.Username}}).Decode(&existingUser)
 	if err == nil {
-		return errors.New("user already exists")
+		// level.Error(logger).Log("err", err)
+		return errors.New("User already exists")
 	}
 
-	err = collection.Insert(user)
+	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
 		return err
 	}
+
+	// logger.Log("User created", id)
 
 	return nil
 }
 
 // GetUserByID retrieves a user from the database based on the user ID.
-func (d *db) GetUserByID(ctx context.Context, userID string) (*User, error) {
-	session := d.session.Copy()
-	defer session.Close()
+func (dbs DBService) GetUserByID(userID string) (*User, error) {
+	//logger := log.With(dbs.logger, "method", "GetUserByID")
 
-	collection := session.DB(getDBName()).C("users")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(getDBUrl()))
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+
+	collection := client.Database(getDBName()).Collection("users")
 
 	user := User{}
-	err := collection.FindId(bson.ObjectIdHex(userID)).One(&user)
+	err = collection.FindOne(context.TODO(), driverbson.D{{Key: "_id", Value: userID}}).Decode(&user)
 	if err != nil {
+		// level.Error(logger).Log("err", err)
 		return nil, err
 	}
 
@@ -81,87 +99,28 @@ func (d *db) GetUserByID(ctx context.Context, userID string) (*User, error) {
 }
 
 // GetUserByUsername retrieves a user from the database based on the username.
-func (d *db) GetUserByUsername(ctx context.Context, username string) (*User, error) {
-	session := d.session.Copy()
-	defer session.Close()
+func (dbs DBService) GetUserByUsername(username string) (*User, error) {
+	// logger := log.With(dbs.logger, "method", "GetUserByUsername")
 
-	collection := session.DB(getDBName()).C("users")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(getDBUrl()))
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+	
+	collection := client.Database(getDBName()).Collection("users")
 
 	user := User{}
-	err := collection.Find(bson.M{"username": username}).One(&user)
+	err = collection.FindOne(context.TODO(), driverbson.D{{Key: "username", Value: username}}).Decode(&user)
 	if err != nil {
+		// level.Error(logger).Log("err", err)
 		return nil, err
 	}
 
 	return &user, nil
-}
-
-// getDBName retrieves the database name from the environment variables.
-func getDBName() string {
-	return os.Getenv("DB_NAME")
-}
-
-// loadEnv loads the environment variables from the .env file.
-func loadEnv() error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Initialize the environment variables.
-func init() {
-	err := loadEnv()
-	if err != nil {
-		panic("Failed to load .env file")
-	}
-}
-
-/* Endpoints */
-
-type Endpoints struct {
-	SaveUserEndpoint          endpoint.Endpoint
-	GetUserByIDEndpoint       endpoint.Endpoint
-	GetUserByUsernameEndpoint endpoint.Endpoint
-}
-
-func NewEndpoints(s DbService) Endpoints {
-	return Endpoints{
-		SaveUserEndpoint:          MakeSaveUserEndpoint(s),
-		GetUserByIDEndpoint:       MakeGetUserByIDEndpoint(s),
-		GetUserByUsernameEndpoint: MakeGetUserByUsernameEndpoint(s),
-	}
-}
-
-/* Transports */
-
-func NewHTTPHandler(endpoints Endpoints) http.Handler {
-	mux := http.NewServeMux()
-
-	options := []httptransport.ServerOption{}
-
-	mux.Handle("/saveUser", httptransport.NewServer(
-		endpoints.SaveUserEndpoint,
-		decodeSaveUserRequest,
-		encodeResponse,
-		options...,
-	))
-
-	mux.Handle("/getUserByID", httptransport.NewServer(
-		endpoints.GetUserByIDEndpoint,
-		decodeGetUserByIDRequest,
-		encodeResponse,
-		options...,
-	))
-
-	mux.Handle("/getUserByUsername", httptransport.NewServer(
-		endpoints.GetUserByUsernameEndpoint,
-		decodeGetUserByUsernameRequest,
-		encodeResponse,
-		options...,
-	))
-
-	return mux
 }

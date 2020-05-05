@@ -1,10 +1,11 @@
-package dbservice
+package db
 
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kit/kit/endpoint"
 	"net/http"
+
+	"github.com/go-kit/kit/endpoint"
 )
 
 /* Requests and responses */
@@ -46,7 +47,7 @@ type GetUserByUsernameResponse struct {
 func MakeSaveUserEndpoint(s DbService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*SaveUserRequest)
-		err := s.SaveUser(ctx, req.User)
+		err := s.SaveUser(req.User)
 		return &SaveUserResponse{Err: err}, nil
 	}
 }
@@ -54,7 +55,7 @@ func MakeSaveUserEndpoint(s DbService) endpoint.Endpoint {
 func MakeGetUserByIDEndpoint(s DbService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*GetUserByIDRequest)
-		user, err := s.GetUserByID(ctx, req.UserID)
+		user, err := s.GetUserByID(req.UserID)
 		return &GetUserByIDResponse{User: user, Err: err}, nil
 	}
 }
@@ -62,31 +63,32 @@ func MakeGetUserByIDEndpoint(s DbService) endpoint.Endpoint {
 func MakeGetUserByUsernameEndpoint(s DbService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*GetUserByUsernameRequest)
-		user, err := s.GetUserByUsername(ctx, req.Username)
+		user, err := s.GetUserByUsername(req.Username)
 		return &GetUserByUsernameResponse{User: user, Err: err}, nil
 	}
 }
 
-/* Transports */
+/* Transports -- publicly accessible FIX */
 
-func decodeSaveUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+// decodeSaveUserRequest decodes the incoming HTTP request into a SaveUserRequest struct.
+func DecodeSaveUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request SaveUserRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	return &request, err
 }
 
-func decodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetUserByIDRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	return &request, err
 }
 
-func decodeGetUserByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func DecodeGetUserByUsernameRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var request GetUserByUsernameRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	return &request, err
 }
 
-func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	return json.NewEncoder(w).Encode(response)
 }
