@@ -21,12 +21,12 @@ type DbService interface {
 type DBService struct{}
 
 
+// Enhance
 /* type DBService struct{
 	repository Repository
 	logger log.Logger
-}*/
+}
 
-/*
 func NewDbService(rep Repository, logger log.Logger) DbService {
 	return &dbService{
 		repository: rep,

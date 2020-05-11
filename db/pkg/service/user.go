@@ -1,3 +1,4 @@
+// Move to folder "models"
 package db
 
 import (
@@ -14,6 +15,7 @@ type User struct {
 	Password string        `bson:"password"`
 }
 
+// Architecture enhance
 type Repository interface {
 	CreateUser(ctx context.Context, user User) error
 	GetUser(ctx context.Context, id string) (string, error)
