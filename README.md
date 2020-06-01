@@ -41,3 +41,8 @@ The project is actively maintained and open to contributions. Some potential are
 - Providing more extensive documentation and tutorials
 
 Feel free to contribute to the project by submitting pull requests or opening issues for bug reports or feature requests.
+
+## Advanced topics
+
+- Threading a context
+- Distributed tracing
