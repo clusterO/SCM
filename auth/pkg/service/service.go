@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -57,17 +59,19 @@ func (a *auth) Authenticate(ctx context.Context, username, password string) (acc
 
 // ValidateToken validates the access token and returns the user information.
 func (a *auth) ValidateToken(ctx context.Context, accessToken string) (userInfo *UserInfo, err error) {
-	// Implement your token validation logic here.
-	// Verify the access token, check its expiration and integrity.
-	// You may use a JWT library or validate the token against a database of active tokens.
-
-	// Example implementation:
 	if validateAccessToken(accessToken) {
-		// Token is valid, retrieve user information from the token or database.
-		userInfo = &UserInfo{
-			ID:       "1",
-			Username: "admin",
+		// Token is valid, retrieve user information from the token or database
+		userID := extractUserIDFromToken(accessToken)
+		user, err := a.dbService.GetUserByID(ctx, userID)
+		if err != nil {
+			return nil, err
 		}
+
+		userInfo = &UserInfo{
+			ID:       user.ID,
+			Username: user.Username,
+		}
+
 		return userInfo, nil
 	}
 
@@ -96,7 +100,40 @@ func validateAccessToken(accessToken string) bool {
 	// Verify the access token against a database of active tokens or blacklist.
 	// Check the token's expiration and integrity.
 
-	// Example implementation:
-	// For demonstration purposes, assume all tokens are valid.
+	// Check if the token starts with "valid_"
+	if !strings.HasPrefix(accessToken, "valid_") {
+		return false
+	}
+
+	// Check the token expiration
+	expiration := extractExpirationFromToken(accessToken)
+	now := time.Now().Unix()
+
+	if expiration <= now {
+		return false
+	}
+
+	// Additional checks or validations can be performed here
+
 	return true
+}
+
+func extractUserIDFromToken(accessToken string) string {
+	// Implement your method to extract the user ID from the token
+	// In this example, we assume the user ID is the substring after "valid_"
+	// Modify this logic according to your actual token structure
+
+	return strings.TrimPrefix(accessToken, "valid_")
+}
+
+func extractExpirationFromToken(accessToken string) int64 {
+	// Implement your method to extract the expiration time from the token
+	// In this example, we assume the expiration time is encoded as a UNIX timestamp
+	// Modify this logic according to your actual token structure
+
+	// Assuming the expiration timestamp is located after the prefix "valid_"
+	expirationStr := strings.TrimPrefix(accessToken, "valid_")
+	expiration, _ := strconv.ParseInt(expirationStr, 10, 64)
+
+	return expiration
 }
