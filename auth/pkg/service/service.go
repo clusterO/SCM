@@ -8,11 +8,14 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	db "db/pkg/service"
 )
 
 // AuthService describes the authentication service.
 type AuthService interface {
 	Authenticate(ctx context.Context, username, password string) (accessToken string, err error)
+	Authorize(ctx context.Context, username, password string) (accessToken string, err error)
 	ValidateToken(ctx context.Context, accessToken string) (userInfo *UserInfo, err error)
 }
 
@@ -25,7 +28,7 @@ type UserInfo struct {
 // auth implements the AuthService interface.
 type auth struct {
 	// You can add necessary dependencies or database connections here.
-	dbService DbService // Replace with your actual db service interface
+	dbService db.DbService // Replace with your actual db service interface
 }
 
 // NewAuthService creates a new instance of the authentication service.
@@ -36,7 +39,7 @@ func NewAuthService() AuthService {
 // Authenticate handles the authentication request and generates an access token if the credentials are valid.
 func (a *auth) Authenticate(ctx context.Context, username, password string) (accessToken string, err error) {
 	// Retrieve the user from the database
-	user, err := a.dbService.GetUserByUsername(ctx, username)
+	user, err := a.dbService.GetUserByUsername(username)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +52,7 @@ func (a *auth) Authenticate(ctx context.Context, username, password string) (acc
 	}
 
 	// Generate an access token
-	accessToken, err = generateAccessToken(user.ID)
+	accessToken, err = generateAccessToken(string(user.ID))
 	if err != nil {
 		return "", err
 	}
@@ -57,17 +60,28 @@ func (a *auth) Authenticate(ctx context.Context, username, password string) (acc
 	return accessToken, errors.New("invalid credentials")
 }
 
+func (a *auth) Authorize(ctx context.Context, accessToken string, permission string) (bool, error) {
+	userInfo, err := a.ValidateToken(ctx, accessToken)
+	if err != nil {
+		return false, err
+	}
+
+	// Check if the user has the required permission
+	hasPermission := checkUserPermission(userInfo, permission)
+	return hasPermission, nil
+}
+
 // ValidateToken validates the access token and returns the user information.
-func (a *auth) ValidateToken(ctx context.Context, accessToken string) (userInfo *UserInfo, err error) {
+func (a *auth) ValidateToken(ctx context.Context, accessToken string) (userInfo *(db.User), err error) {
 	if validateAccessToken(accessToken) {
 		// Token is valid, retrieve user information from the token or database
 		userID := extractUserIDFromToken(accessToken)
-		user, err := a.dbService.GetUserByID(ctx, userID)
+		user, err := a.dbService.GetUserByID(userID)
 		if err != nil {
 			return nil, err
 		}
 
-		userInfo = &UserInfo{
+		userInfo = &db.User {
 			ID:       user.ID,
 			Username: user.Username,
 		}
@@ -77,6 +91,27 @@ func (a *auth) ValidateToken(ctx context.Context, accessToken string) (userInfo 
 
 	return nil, errors.New("invalid access token")
 }
+
+func checkUserPermission(userInfo *(db.User), permission string) bool {
+	for _, role := range userInfo.Roles {
+		if hasRolePermission(role, permission) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasRolePermission(role string, permission string) bool {
+	// You may check against a database, configuration file, or other rules to validate the role permission.
+	if role == "admin" && permission == "admin" {
+		return true
+	}
+
+	return false
+}
+
+// Enhance
 
 // generateAccessToken generates a random access token.
 func generateAccessToken(userID string) (string, error) {

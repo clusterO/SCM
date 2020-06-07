@@ -11,6 +11,9 @@ import (
 
 // DbService describes the service.
 type DbService interface {
+	
+	// Does it need a context as first argument - FIX
+
 	SaveUser(user *User) error
 	GetUserByID(userID string) (*User, error)
 	GetUserByUsername(username string) (*User, error)
@@ -19,7 +22,6 @@ type DbService interface {
 /* Business logic */
 // -- publicly accessible FIX
 type DBService struct{}
-
 
 // Enhance
 /* type DBService struct{
