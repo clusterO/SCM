@@ -5,8 +5,6 @@ import (
 	db "db/pkg/service"
 	"log"
 	"net/http"
-
-	httptransport "github.com/go-kit/kit/transport/http"
 )
 
 func main() {
@@ -40,6 +38,8 @@ func main() {
 
 	*/
 
+	/* -- GoKit microservices -- */
+
 	/* Transport logging
 	logger := log.NewLogfmtLogger(os.Stderr)
 
@@ -51,66 +51,19 @@ func main() {
 	// getbyusername
 	*/
 
-	/* Application logging */
+	/* Application logging 
+	*/
 
+	dbs := db.NewDbService()
+	oths := auth.NewAuthService(dbs)
 
-	dbs := db.DBService{}
-	oths := auth.Auth{}
-
-	AuthenticateHandler := httptransport.NewServer(
-		auth.MakeAuthenticateEndpoint(oths),
-		auth.DecodeAuthenticateRequest,
-		auth.EncodeResponse,
-		httptransport.ServerErrorEncoder(auth.ErrorEncoder),
-	)
-
-	AuthorizeHandler := httptransport.NewServer(
-		auth.MakeAuthorizeEndpoint(oths),
-		auth.DecodeAuthorizeRequest,
-		auth.EncodeResponse,
-		httptransport.ServerErrorEncoder(auth.ErrorEncoder),
-	)
-
-	ValidateTokenHandler := httptransport.NewServer(
-		auth.MakeValidateTokenEndpoint(oths),
-		auth.DecodeValidateTokenRequest,
-		auth.EncodeResponse,
-		httptransport.ServerErrorEncoder(auth.ErrorEncoder),
-	)
-
-	EncryptionHandler := httptransport.NewServer(
-		auth.MakeEncryptionEndpoint(oths),
-		auth.DecodeEncryptionRequest,
-		auth.EncodeResponse,
-		httptransport.ServerErrorEncoder(auth.ErrorEncoder),
-	)
-
-	SaveUserHandler := httptransport.NewServer(
-		db.MakeSaveUserEndpoint(dbs),
-		db.DecodeSaveUserRequest,
-		db.EncodeResponse,
-	)
-
-	GetUserByIDHandler := httptransport.NewServer(
-		db.MakeGetUserByIDEndpoint(dbs),
-		db.DecodeGetUserByIDRequest,
-		db.EncodeResponse,
-	)
-
-	GetUserByUsernameHandler := httptransport.NewServer(
-		db.MakeGetUserByUsernameEndpoint(dbs),
-		db.DecodeGetUserByUsernameRequest,
-		db.EncodeResponse,
-	)
-
-	http.Handle("/save", SaveUserHandler)
-	http.Handle("/get_by_id", GetUserByIDHandler)
-	http.Handle("/get_by_username", GetUserByUsernameHandler)
-
-	http.Handle("/authenticate", AuthenticateHandler)
-	http.Handle("/authorize", AuthorizeHandler)
-	http.Handle("/validate_token", ValidateTokenHandler)
-	http.Handle("/encryption", EncryptionHandler)
+	http.Handle("/save", db.SaveUserHandler(dbs))
+	http.Handle("/get_by_id", db.GetUserByIDHandler(dbs))
+	http.Handle("/get_by_username", db.GetUserByUsernameHandler(dbs))
+	http.Handle("/authenticate", auth.AuthenticateHandler(oths))
+	http.Handle("/authorize", auth.AuthorizeHandler(oths))
+	http.Handle("/validate_token", auth.ValidateTokenHandler(oths))
+	http.Handle("/encryption", auth.EncryptionHandler(oths))
 
 	print("listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

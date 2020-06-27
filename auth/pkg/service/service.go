@@ -24,6 +24,11 @@ type Auth struct {
 	dbService db.DbService // Replace with your actual db service interface
 }
 
+// NewAuthService creates a new instance of the authentication service.
+func NewAuthService(db db.DbService) AuthService {
+	return &Auth{db}
+}
+
 // Authenticate handles the authentication request and generates an access token if the credentials are valid.
 func (a Auth) Authenticate(ctx context.Context, username, password string) (accessToken string, err error) {
 	user, err := a.dbService.GetUserByUsername(username) // a.dbService is nil FIX

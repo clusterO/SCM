@@ -24,18 +24,23 @@ type DbService interface {
 type DBService struct{}
 
 // Enhance
-/* type DBService struct{
+/*
+type DBService struct{
 	repository Repository
-	logger log.Logger
+	logger *log.Logger
 }
 
-func NewDbService(rep Repository, logger log.Logger) DbService {
-	return &dbService{
+func NewDbService(rep Repository, logger *log.Logger) DbService {
+	return &DBService{
 		repository: rep,
 		logger: logger,
 	}
 }
 */
+
+func NewDbService() DbService {
+	return &DBService{}
+}
 
 // SaveUser saves a user to the database.
 func (dbs DBService) SaveUser(user *User) error {
