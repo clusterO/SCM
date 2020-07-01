@@ -39,6 +39,7 @@ The project is actively maintained and open to contributions. Some potential are
 - Enhancing security measures
 - Integrating additional databases or message brokers
 - Providing more extensive documentation and tutorials
+- DevOps integration
 
 Feel free to contribute to the project by submitting pull requests or opening issues for bug reports or feature requests.
 

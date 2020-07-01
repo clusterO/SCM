@@ -2,9 +2,14 @@ package main
 
 import (
 	auth "auth/pkg/service"
+	"context"
 	db "db/pkg/service"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -57,16 +62,40 @@ func main() {
 	dbs := db.NewDbService()
 	oths := auth.NewAuthService(dbs)
 
-	http.Handle("/save", db.SaveUserHandler(dbs))
-	http.Handle("/get_by_id", db.GetUserByIDHandler(dbs))
-	http.Handle("/get_by_username", db.GetUserByUsernameHandler(dbs))
-	http.Handle("/authenticate", auth.AuthenticateHandler(oths))
-	http.Handle("/authorize", auth.AuthorizeHandler(oths))
-	http.Handle("/validate_token", auth.ValidateTokenHandler(oths))
-	http.Handle("/encryption", auth.EncryptionHandler(oths))
+	sm := http.NewServeMux()
+	sm.Handle("/save", db.SaveUserHandler(dbs))
+	sm.Handle("/get_by_id", db.GetUserByIDHandler(dbs))
+	sm.Handle("/get_by_username", db.GetUserByUsernameHandler(dbs))
+	sm.Handle("/authenticate", auth.AuthenticateHandler(oths))
+	sm.Handle("/authorize", auth.AuthorizeHandler(oths))
+	sm.Handle("/validate_token", auth.ValidateTokenHandler(oths))
+	sm.Handle("/encryption", auth.EncryptionHandler(oths))
 
-	print("listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	s := &http.Server{
+		Addr: ":8080",
+		Handler: sm,
+		IdleTimeout: 120*time.Second,
+		ReadTimeout: 1*time.Second,
+		WriteTimeout: 1*time.Second,
+	}
+
+	go func() {
+		fmt.Println("listening on port 8080")
+		err := s.ListenAndServe()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	/* Gracefull shutdown */
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, os.Interrupt)
+	signal.Notify(sigChan, os.Kill)
+
+	sig := <- sigChan
+	log.Println("Received terminate, graceful shutdown", sig)
+	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	s.Shutdown(tc)
 }
 
 /*
