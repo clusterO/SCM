@@ -2,6 +2,8 @@ package availability
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -63,4 +65,23 @@ func MakeReserveAvailabilityEndpoint(svc AvailabilityService) endpoint.Endpoint 
 		}
 		return ReserveResponse{Err: err}, nil
 	}
+}
+
+func DecodeGetAvailabilityRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	request := GetAvailabilityRequest{}
+	return request, nil
+}
+
+func DecodeCheckAvailabilityRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	request := CheckAvailabilityRequest{}
+	return request, nil
+}
+
+func DecodeReserveAvailabilityRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	request := ReserveRequest{}
+	return request, nil
+}
+
+func EncodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	return json.NewEncoder(w).Encode(response)
 }
