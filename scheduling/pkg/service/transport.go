@@ -2,6 +2,8 @@ package scheduling
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
@@ -356,3 +358,176 @@ func makePayPeriodArrayEndpoint(svc SchedulingService) endpoint.Endpoint {
 		return PayPeriodArrayResponse{PayPeriods: payPeriods, Err: err}, nil
 	}
 }
+
+func decodeInsertSchedulingLogsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertSchedulingLogsRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeInsertRotationChangeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertRotationChangeRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeInsertScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeRemoveScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req RemoveScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeInsertShiftHistoryRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertShiftHistoryRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeUpdateScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req UpdateScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeUpdateEmployeeShiftRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req UpdateEmployeeShiftRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeStuckShiftRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req StuckShiftRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeAssignEmployeeToUrgentUnfilledRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req AssignEmployeeToUrgentUnfilledRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeAddNoteScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req AddNoteScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeAddNoteMasterScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req AddNoteMasterScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func decodeAddNoteMasterChangeRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req AddNoteMasterChangeRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for GetMasterScheduleShiftsRequest
+func decodeGetMasterScheduleShiftsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req GetMasterScheduleShiftsRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for InsertDetailCallOutRequest
+func decodeInsertDetailCallOutRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertDetailCallOutRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for InsertCallOutResultsRequest
+func decodeInsertCallOutResultsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req InsertCallOutResultsRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for AssignUserToLocationScheduleRequest
+func decodeAssignUserToLocationScheduleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req AssignUserToLocationScheduleRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for GetShiftsRequest
+func decodeGetShiftsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req GetShiftsRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Decoder function for PayPeriodArrayRequest
+func decodePayPeriodArrayRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req PayPeriodArrayRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// Encoder function for responses
+func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	return json.NewEncoder(w).Encode(response)
+	}
