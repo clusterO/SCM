@@ -14,9 +14,20 @@ type AvailabilityService interface {
 type availabilityService struct{}
 
 func (availabilityService) CheckAvailability(ctx context.Context, item string) (bool, error) {
-	// Implement your logic to check the availability of the item here
-	// For this example, let's assume the item is always available
-	return true, nil
+	// For demonstration purposes, let's assume the item is always available
+	// You should replace this with your actual implementation
+
+	// If the item is available, return true
+	// If the item is not available, return false
+	// If there's an error while checking availability, return an error
+
+	// Example implementation:
+	if item == "example_item" {
+		return true, nil
+	}
+
+	// If the item is not available, return false
+	return false, nil
 }
 
 func (availabilityService) GetAvailability(ctx context.Context, item string) (int, error) {
